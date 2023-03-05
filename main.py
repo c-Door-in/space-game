@@ -5,10 +5,13 @@ import random
 from itertools import cycle
 from statistics import median
 
+from environs import Env
+
 from curses_tools import draw_frame, read_controls, get_frame_size
 
 
 async def blink(canvas, row, column, symbol='*'):
+
     while True:
         for _ in range(random.randint(0, 3)):
             await asyncio.sleep(0)
@@ -60,6 +63,7 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
 
 
 def check_border_touch(top_row, left_column, max_row, max_column, frame_rows, frame_columns):
+
     top_row = 1 if top_row < 1 else top_row
     left_column = 1 if left_column < 1 else left_column
     top_row = max_row - frame_rows if top_row + frame_rows > max_row else top_row
@@ -111,27 +115,18 @@ def get_rocket_frames():
     return rocket_frame_1, rocket_frame_2
 
 
-def draw(canvas):
-    # row, column = (5, 20)
+def draw(canvas, tick_timeout, star_simbols, stars_amount, spaceship_speed):
     
     curses.curs_set(False)
     row, column = canvas.getmaxyx()
     max_row, max_column = row - 1, column - 1
 
-    tick_timeout=0.1
-    star_simbols = '+*.:'
-    star_amount=200
-    spaceship_speed = 0.5
-
     coroutines = []
-    for _ in range(star_amount):
+    for _ in range(stars_amount):
         row = random.randint(1, max_row)
         column = random.randint(1, max_column)
         simbol = random.choice(star_simbols)
         coroutines.append(blink(canvas, row, column, simbol))
-
-    # fire_making = fire(canvas, start_row, start_column)
-    # coroutines.append(fire_making)
 
     frames = get_rocket_frames()
     spaceship = animate_spaceship(canvas, frames, max_row, max_column, spaceship_speed)
@@ -147,25 +142,19 @@ def draw(canvas):
                 coroutines.remove(coroutine)
         time.sleep(tick_timeout)
 
-    # while True:
-    #     canvas.addstr(row, column, '*', curses.A_DIM)
-    #     time.sleep(2)
-    #     canvas.refresh()
-    #     canvas.addstr(row, column, '*')
-    #     time.sleep(0.3)
-    #     canvas.refresh()
-    #     canvas.addstr(row, column, '*', curses.A_BOLD)
-    #     time.sleep(0.5)
-    #     canvas.refresh()
-    #     canvas.addstr(row, column, '*')
-    #     time.sleep(0.3)
-    #     canvas.refresh()
 
+def main(canvas):
+    env = Env()
+    env.read_env()
 
-def main():
-    curses.update_lines_cols()
-    curses.wrapper(draw)
+    tick_timeout=env.float('TICK_TIMEOUNT', 0.1)
+    star_simbols = env.str('STAR_SIMBOLS', '+*.:')
+    stars_amount=env.int('STARS_AMOUNT', 200)
+    spaceship_speed = env.float('SPACESHIP_SPEED', 10.0)
+
+    draw(canvas, tick_timeout, star_simbols, stars_amount, spaceship_speed)
 
 
 if __name__ == '__main__':
-    main()
+    curses.update_lines_cols()
+    curses.wrapper(main)

@@ -1,1 +1,2 @@
+environs==9.5.*
 windows-curses==2.3.*
