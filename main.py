@@ -99,10 +99,8 @@ async def animate_spaceship(canvas, frames, max_row, max_column, speed=1):
                                                   ship_columns)
         
         draw_frame(canvas, round(top_row), round(left_column), frame)
-        canvas.refresh()
         await asyncio.sleep(0)
         draw_frame(canvas, round(top_row), round(left_column), frame, negative=True)
-        canvas.refresh()
 
 
 def get_rocket_frames():
@@ -118,6 +116,7 @@ def get_rocket_frames():
 def draw(canvas, tick_timeout, star_simbols, stars_amount, spaceship_speed):
     
     curses.curs_set(False)
+    canvas.border()
     row, column = canvas.getmaxyx()
     max_row, max_column = row - 1, column - 1
 
@@ -136,11 +135,10 @@ def draw(canvas, tick_timeout, star_simbols, stars_amount, spaceship_speed):
     while True:
         for coroutine in coroutines.copy():
             try:
-                canvas.border()
                 coroutine.send(None)
-                canvas.refresh()
             except StopIteration:
                 coroutines.remove(coroutine)
+        canvas.refresh()
         time.sleep(tick_timeout)
 
 
