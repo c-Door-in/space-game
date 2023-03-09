@@ -10,10 +10,10 @@ from environs import Env
 from curses_tools import draw_frame, read_controls, get_frame_size
 
 
-async def blink(canvas, row, column, symbol='*'):
+async def blink(canvas, row, column, symbol='*', offset_ticks=0):
 
     while True:
-        for _ in range(random.randint(0, 3)):
+        for _ in range(offset_ticks):
             await asyncio.sleep(0)
         canvas.addstr(row, column, symbol, curses.A_DIM)
         for _ in range(20):
@@ -126,7 +126,8 @@ def draw(canvas, tick_timeout, star_simbols, stars_amount, spaceship_speed):
         row = random.randint(1, max_row)
         column = random.randint(1, max_column)
         simbol = random.choice(star_simbols)
-        coroutines.append(blink(canvas, row, column, simbol))
+        offset_ticks = random.randint(0, 3)
+        coroutines.append(blink(canvas, row, column, simbol, offset_ticks))
 
     frames = get_rocket_frames()
     spaceship = animate_spaceship(canvas, frames, max_row, max_column, spaceship_speed)
