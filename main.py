@@ -62,16 +62,6 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
         column += columns_speed
 
 
-def check_border_touch(top_row, left_column, max_row, max_column, frame_rows, frame_columns):
-
-    top_row = 1 if top_row < 1 else top_row
-    left_column = 1 if left_column < 1 else left_column
-    top_row = max_row - frame_rows if top_row + frame_rows > max_row else top_row
-    left_column = max_column - frame_columns \
-        if left_column + frame_columns > max_column else left_column
-    return top_row, left_column
-
-
 async def animate_spaceship(canvas, frames, max_row, max_column, speed=1):
 
     canvas.nodelay(True)
@@ -91,12 +81,9 @@ async def animate_spaceship(canvas, frames, max_row, max_column, speed=1):
         if columns_direction:
             left_column += columns_direction * speed
 
-        top_row, left_column = check_border_touch(top_row,
-                                                  left_column,
-                                                  max_row,
-                                                  max_column,
-                                                  ship_rows,
-                                                  ship_columns)
+        top_row = max(1, top_row) if top_row < 1 else min(top_row, max_row - ship_rows)
+        left_column = max(1, left_column) if left_column < 1 \
+            else min(left_column, max_column - ship_columns)
         
         draw_frame(canvas, round(top_row), round(left_column), frame)
         await asyncio.sleep(0)
