@@ -62,15 +62,15 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
         column += columns_speed
 
 
-async def animate_spaceship(canvas, frames, max_row, max_column, speed=1):
+async def animate_spaceship(canvas, frames, max_row, max_column, border_width, speed=1):
 
     canvas.nodelay(True)
     
     ship_rows = max([get_frame_size(frame)[0] for frame in frames])
     ship_columns = max([get_frame_size(frame)[1] for frame in frames])
 
-    middle_row = median([1, (max_row)])
-    middle_column = median([1, (max_column)])
+    middle_row = median([border_width, (max_row)])
+    middle_column = median([border_width, (max_column)])
     top_row = middle_row - median([0, ship_rows])
     left_column = middle_column - median([0, ship_columns])
     
@@ -80,8 +80,9 @@ async def animate_spaceship(canvas, frames, max_row, max_column, speed=1):
         if rows_direction or columns_direction:
             top_row += rows_direction * speed
             left_column += columns_direction * speed
-            top_row = max(1, top_row) if top_row < 1 else min(top_row, max_row - ship_rows)
-            left_column = max(1, left_column) if left_column < 1 \
+            top_row = max(border_width, top_row) if top_row < border_width \
+                else min(top_row, max_row - ship_rows)
+            left_column = max(border_width, left_column) if left_column < border_width \
                 else min(left_column, max_column - ship_columns)
             ship_move = True
         
@@ -106,19 +107,20 @@ def draw(canvas, tick_timeout, star_simbols, stars_amount, spaceship_speed):
     
     curses.curs_set(False)
     canvas.border()
+    border_width = 1
     row, column = canvas.getmaxyx()
-    max_row, max_column = row - 1, column - 1
+    max_row, max_column = row - border_width - 1, column - border_width - 1
 
     coroutines = []
     for _ in range(stars_amount):
-        row = random.randint(1, max_row)
-        column = random.randint(1, max_column)
+        row = random.randint(border_width, max_row)
+        column = random.randint(border_width, max_column)
         simbol = random.choice(star_simbols)
         offset_ticks = random.randint(0, 3)
         coroutines.append(blink(canvas, row, column, simbol, offset_ticks))
 
     frames = get_rocket_frames()
-    spaceship = animate_spaceship(canvas, frames, max_row, max_column, spaceship_speed)
+    spaceship = animate_spaceship(canvas, frames, max_row, max_column, border_width, spaceship_speed)
     coroutines.append(spaceship)
 
     while True:
