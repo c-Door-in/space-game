@@ -75,18 +75,20 @@ async def animate_spaceship(canvas, frames, max_row, max_column, speed=1):
     left_column = middle_column - median([0, ship_columns])
     
     for frame in cycle(frames):
+        ship_move = False
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
-        if rows_direction:
+        if rows_direction or columns_direction:
             top_row += rows_direction * speed
-        if columns_direction:
             left_column += columns_direction * speed
-
-        top_row = max(1, top_row) if top_row < 1 else min(top_row, max_row - ship_rows)
-        left_column = max(1, left_column) if left_column < 1 \
-            else min(left_column, max_column - ship_columns)
+            top_row = max(1, top_row) if top_row < 1 else min(top_row, max_row - ship_rows)
+            left_column = max(1, left_column) if left_column < 1 \
+                else min(left_column, max_column - ship_columns)
+            ship_move = True
         
         draw_frame(canvas, round(top_row), round(left_column), frame)
         await asyncio.sleep(0)
+        if not ship_move:
+            await asyncio.sleep(0)
         draw_frame(canvas, round(top_row), round(left_column), frame, negative=True)
 
 
